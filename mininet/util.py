@@ -4,17 +4,16 @@ import codecs
 import os
 import re
 import sys
-
-from fcntl import fcntl, F_GETFL, F_SETFL
+from fcntl import F_GETFL, F_SETFL, fcntl
 from functools import partial
 from os import O_NONBLOCK
-from resource import getrlimit, setrlimit, RLIMIT_NPROC, RLIMIT_NOFILE
-from select import poll, POLLIN, POLLHUP
-from subprocess import call, check_call, Popen, PIPE, STDOUT
+from resource import RLIMIT_NOFILE, RLIMIT_NPROC, getrlimit, setrlimit
+from select import POLLHUP, POLLIN, poll
+from subprocess import PIPE, STDOUT, Popen, call, check_call
 from sys import exit  # pylint: disable=redefined-builtin
 from time import sleep
 
-from mininet.log import output, info, error, warn, debug
+from mininet.log import debug, error, info, output, warn
 
 # pylint: disable=too-many-arguments
 
@@ -257,10 +256,14 @@ def makeIntfPair( intf1, intf2, addr1=None, addr2=None, node1=None, node2=None,
     netns = 1 if not node2 else node2.pid
     if addr1 is None and addr2 is None:
         cmdOutput = runCmd( 'ip link add name %s '
+                            'numrxqueues 8 '
+                            'numtxqueues 8 '
                             'type veth peer name %s '
                             'netns %s' % ( intf1, intf2, netns ) )
     else:
         cmdOutput = runCmd( 'ip link add name %s '
+                            'numtxqueues 8 '
+                            'numrxqueues 8 '
                             'address %s '
                             'type veth peer name %s '
                             'address %s '
